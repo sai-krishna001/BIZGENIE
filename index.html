@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BizFlow AI — Business Management Hub</title>
+  <meta name="description" content="BizFlow AI — simple business management, content generation and Google Sheets analytics in one dashboard.">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+  <!-- ==================== AUTH SCREEN ==================== -->
+  <div id="authScreen" class="auth-screen">
+    <div class="auth-bg">
+      <div class="auth-orb auth-orb-1"></div>
+      <div class="auth-orb auth-orb-2"></div>
+      <div class="auth-orb auth-orb-3"></div>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="logo-mark">B</div>
+        <div>
+          <strong>BizFlow AI</strong>
+          <span>Business Management Hub</span>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" data-auth="login" id="tabLogin">Login</button>
+        <button type="button" class="auth-tab" data-auth="signup" id="tabSignup">Create Account</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <form id="loginForm" class="auth-form active" autocomplete="on">
+        <p class="auth-desc">Enter your registered email and phone to continue. No OTP required.</p>
+
+        <div class="field">
+          <label for="loginEmail">Email address</label>
+          <input id="loginEmail" type="email" placeholder="you@gmail.com" required autocomplete="email">
+          <small class="field-hint">Must include @ (e.g. name@gmail.com)</small>
+        </div>
+
+        <div class="field">
+          <label for="loginPhone">Mobile number</label>
+          <div class="phone-row">
+            <span class="phone-prefix">+91</span>
+            <input id="loginPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit mobile number" required autocomplete="tel">
+          </div>
+          <small class="field-hint">Exactly 10 digits, no spaces or symbols</small>
+        </div>
+
+        <div class="field">
+          <label for="loginPassword">Password</label>
+          <input id="loginPassword" type="password" placeholder="Your password" required minlength="6" autocomplete="current-password">
+        </div>
+
+        <div id="loginError" class="auth-error" hidden></div>
+
+        <button type="submit" class="btn primary auth-submit" id="loginBtn">Login to BizFlow</button>
+      </form>
+
+      <!-- SIGNUP FORM -->
+      <form id="signupForm" class="auth-form" autocomplete="on">
+        <p class="auth-desc">Create your account with email + 10-digit mobile. No OTP needed.</p>
+
+        <div class="field">
+          <label for="signupName">Full name</label>
+          <input id="signupName" type="text" placeholder="Your name" required autocomplete="name">
+        </div>
+
+        <div class="field">
+          <label for="signupEmail">Email address</label>
+          <input id="signupEmail" type="email" placeholder="you@gmail.com" required autocomplete="email">
+          <small class="field-hint">Must be a valid email with @ (Gmail or any provider)</small>
+        </div>
+
+        <div class="field">
+          <label for="signupPhone">Mobile number</label>
+          <div class="phone-row">
+            <span class="phone-prefix">+91</span>
+            <input id="signupPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit mobile number" required autocomplete="tel">
+          </div>
+          <small class="field-hint">Exactly 10 digits required</small>
+        </div>
+
+        <div class="field">
+          <label for="signupPassword">Create password</label>
+          <input id="signupPassword" type="password" placeholder="Min. 6 characters" required minlength="6" autocomplete="new-password">
+        </div>
+
+        <div class="field">
+          <label for="signupPassword2">Confirm password</label>
+          <input id="signupPassword2" type="password" placeholder="Re-enter password" required minlength="6" autocomplete="new-password">
+        </div>
+
+        <div id="signupError" class="auth-error" hidden></div>
+        <div id="signupSuccess" class="auth-success" hidden></div>
+
+        <button type="submit" class="btn primary auth-submit" id="signupBtn">Create Account</button>
+      </form>
+
+      <p class="auth-footer">Your data stays on this device. No OTP / SMS verification.</p>
+    </div>
+  </div>
+
+  <!-- ==================== MAIN APP (hidden until login) ==================== -->
+  <div class="app" id="mainApp" hidden>
+    <aside class="sidebar" id="sidebar">
+      <div class="logo">
+        <div class="logo-mark">B</div>
+        <span>BizFlow AI</span>
+      </div>
+
+      <nav class="nav" id="nav">
+        <button class="active" data-view="dashboard" type="button">◈ <span>Dashboard</span></button>
+        <button data-view="content" type="button">✦ <span>Content Studio</span></button>
+        <button data-view="seo" type="button">⌕ <span>SEO Builder</span></button>
+        <button data-view="analytics" type="button">◒ <span>Analytics</span></button>
+        <button data-view="sheet" type="button">▣ <span>Google Sheet</span></button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="user-chip" id="userChip">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <div class="user-meta">
+            <strong id="userNameLabel">User</strong>
+            <span id="userEmailLabel">—</span>
+          </div>
+        </div>
+        <div class="sheet-status">
+          <span id="statusDot" class="dot"></span>
+          <span id="statusText">Google Sheet not connected</span>
+        </div>
+        <button type="button" class="btn logout-btn" id="logoutBtn">Log out</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="page-title">
+          <button class="btn mobile-menu" id="mobileMenuBtn" type="button" aria-label="Open menu">☰</button>
+          <div>
+            <h1 id="pageTitle">Business Dashboard</h1>
+            <p id="pageSubtitle">Manage content, SEO and business numbers from one place.</p>
+          </div>
+        </div>
+        <div class="top-actions">
+          <button class="btn hide-mobile" id="topConnectBtn" type="button">▣ Connect Sheet</button>
+          <button class="btn primary" id="topCreateBtn" type="button">✦ Create Content</button>
+        </div>
+      </div>
+
+      <!-- Dashboard -->
+      <section id="dashboard" class="view active">
+        <div class="hero">
+          <h2>Turn your business data into action.</h2>
+          <p>Generate social content, build product SEO and understand income versus expenditure — without complicated setup.</p>
+          <button class="btn" id="heroConnectBtn" type="button">Connect Google Sheet →</button>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <small>Total Income</small>
+            <strong class="income" id="sIncome">₹0</strong>
+          </div>
+          <div class="stat">
+            <small>Total Expenditure</small>
+            <strong class="expense" id="sExpense">₹0</strong>
+          </div>
+          <div class="stat">
+            <small>Net Balance</small>
+            <strong id="sNet">₹0</strong>
+          </div>
+          <div class="stat">
+            <small>Transactions</small>
+            <strong id="sCount">0</strong>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h3>Recent Transactions</h3>
+            <div class="sub">Latest records imported from your sheet.</div>
+            <div id="recentTable">
+              <div class="help">Connect a Google Sheet to see live business records here.</div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Quick Tools</h3>
+            <div class="sub">Common tasks for online sellers.</div>
+            <div class="pills">
+              <button class="pill" data-goto="content" type="button">Instagram Caption</button>
+              <button class="pill" data-goto="content" type="button">Instagram Bio</button>
+              <button class="pill" data-goto="seo" type="button">Product SEO</button>
+              <button class="pill" data-goto="analytics" type="button">View Analytics</button>
+            </div>
+            <div class="help tip">
+              <b>Tip:</b> Keep your sheet columns simple: Date, Description, Type, Amount, Category. BizFlow also accepts separate Income and Expenditure columns.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Content Studio -->
+      <section id="content" class="view">
+        <div class="card">
+          <h3>✦ Content Studio</h3>
+          <div class="sub">Create ready-to-edit social copy from your product details.</div>
+          <div class="form-grid">
+            <div class="field">
+              <label for="cName">Product / Brand Name</label>
+              <input id="cName" type="text" placeholder="e.g. Trendtig Oversized Tee">
+            </div>
+            <div class="field">
+              <label for="cType">Content Type</label>
+              <select id="cType">
+                <option>Instagram Caption</option>
+                <option>Instagram Bio</option>
+                <option>Instagram Product Description</option>
+                <option>WhatsApp Promo</option>
+                <option>Short Reel Caption</option>
+                <option>Call-to-Action</option>
+              </select>
+            </div>
+            <div class="field full">
+              <label for="cDetails">Product Details</label>
+              <textarea id="cDetails" placeholder="Price, material, audience, features, offer, location, USP..."></textarea>
+            </div>
+            <div class="field">
+              <label for="cTone">Tone</label>
+              <select id="cTone">
+                <option>Professional</option>
+                <option>Premium</option>
+                <option>Friendly</option>
+                <option>Bold</option>
+                <option>Minimal</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="cAudience">Platform / Audience</label>
+              <input id="cAudience" type="text" placeholder="Instagram / Indian online shoppers">
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn primary" id="generateContentBtn" type="button">Generate</button>
+            <button class="btn" id="copyContentBtn" type="button">Copy</button>
+          </div>
+          <div id="contentOutput" class="output" style="margin-top:15px">Your generated copy will appear here.</div>
+        </div>
+      </section>
+
+      <!-- SEO Builder -->
+      <section id="seo" class="view">
+        <div class="card">
+          <h3>⌕ SEO Builder</h3>
+          <div class="sub">Generate practical title, description, keywords, tags and a URL slug from product information.</div>
+          <div class="form-grid">
+            <div class="field">
+              <label for="pName">Product Name</label>
+              <input id="pName" type="text" placeholder="e.g. Black Oversized Anime T-Shirt">
+            </div>
+            <div class="field">
+              <label for="pCategory">Category</label>
+              <input id="pCategory" type="text" placeholder="Streetwear / Fashion">
+            </div>
+            <div class="field full">
+              <label for="pDetails">Product Details & Keywords</label>
+              <textarea id="pDetails" placeholder="Colour, material, size, audience, use case, unique features, location, price..."></textarea>
+            </div>
+            <div class="field">
+              <label for="pMarket">Target Market</label>
+              <input id="pMarket" type="text" placeholder="India">
+            </div>
+            <div class="field">
+              <label for="pKeyword">Primary Keyword</label>
+              <input id="pKeyword" type="text" placeholder="oversized anime t shirt">
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn primary" id="generateSeoBtn" type="button">Build SEO</button>
+            <button class="btn" id="copySeoBtn" type="button">Copy</button>
+          </div>
+          <div id="seoOutput" class="output" style="margin-top:15px">SEO output will appear here.</div>
+        </div>
+      </section>
+
+      <!-- Analytics -->
+      <section id="analytics" class="view">
+        <div class="stats">
+          <div class="stat">
+            <small>Total Income</small>
+            <strong class="income" id="aIncome">₹0</strong>
+          </div>
+          <div class="stat">
+            <small>Total Expenditure</small>
+            <strong class="expense" id="aExpense">₹0</strong>
+          </div>
+          <div class="stat">
+            <small>Net Balance</small>
+            <strong id="aNet">₹0</strong>
+          </div>
+          <div class="stat">
+            <small>Profit Margin</small>
+            <strong id="aMargin">0%</strong>
+          </div>
+        </div>
+        <div class="analytics-grid">
+          <div class="card">
+            <h3>Income vs Expenditure</h3>
+            <div class="sub">Grouped by month from imported transactions.</div>
+            <div id="chart" class="chart"></div>
+          </div>
+          <div class="card">
+            <h3>Expense Categories</h3>
+            <div class="sub">Where your expenditure is going.</div>
+            <div id="categoryList">
+              <div class="help">Connect your sheet first.</div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:18px">
+          <h3>All Transactions</h3>
+          <div class="sub">Imported data used for the calculations.</div>
+          <div id="allTable">
+            <div class="help">No data loaded.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Google Sheet -->
+      <section id="sheet" class="view">
+        <div class="card">
+          <h3>▣ Connect Google Sheet</h3>
+          <div class="sub">BizFlow reads your published sheet and turns the rows into analytics.</div>
+          <div class="help">
+            <b>Easiest setup:</b> Open your Google Sheet → Share → General access → <b>Anyone with the link</b> → Viewer.
+            Then paste the sheet URL below. Your sheet should contain either
+            <b>Date, Description, Type, Amount, Category</b> or
+            <b>Date, Description, Income, Expenditure, Category</b>.
+          </div>
+          <div class="field" style="margin-top:14px">
+            <label for="sheetUrl">Google Sheet URL</label>
+            <input id="sheetUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/....../edit#gid=0">
+          </div>
+          <div class="actions">
+            <button class="btn primary" id="connectSheetBtn" type="button">Connect & Load Data</button>
+            <button class="btn danger" id="disconnectSheetBtn" type="button">Disconnect</button>
+          </div>
+          <div id="sheetMessage" class="sheet-message"></div>
+          <details class="sheet-format">
+            <summary><b>Recommended sheet format</b></summary>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Category</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>2026-09-01</td>
+                    <td>Product Sale</td>
+                    <td>Income</td>
+                    <td>2500</td>
+                    <td>Sales</td>
+                  </tr>
+                  <tr>
+                    <td>2026-09-02</td>
+                    <td>Packaging</td>
+                    <td>Expenditure</td>
+                    <td>450</td>
+                    <td>Operations</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 id="modalTitle">Google Sheet</h3>
+        <button class="close" id="closeModalBtn" type="button" aria-label="Close">×</button>
+      </div>
+      <p class="sub">Paste your public Google Sheet URL.</p>
+      <input id="modalSheetUrl" type="url" placeholder="Google Sheet URL">
+      <div class="actions">
+        <button class="btn primary" id="connectFromModalBtn" type="button">Connect</button>
+      </div>
+      <div class="help" style="margin-top:14px">
+        For this no-login version, the sheet needs to be viewable by anyone with the link. No Google password is collected by BizFlow.
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="./app.js"></script>
+</body>
+<footer class="site-footer">
+  Made by <strong>Sodisetti Sai Krishna</strong> · Copyrights Reserved 2026
+</footer>
+</html>
